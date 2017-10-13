@@ -1,6 +1,6 @@
 from random import gauss, random, randint
 
-alpha = 0.2
+alpha = 0.4
 epsilon = 0.1
 steps = 1000
 k = 10
