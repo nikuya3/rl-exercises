@@ -26,6 +26,7 @@ deviation of 0.01.
 ### Result
 After training, a plot shows the performance of a sample-average and a constant-step-size algorithm. It is clear to see
 that the constant-step-size algorithm performs better on non-stationary tasks.
+
 ![](img/2.5.1.png)
 ![](img/2.5.2.png)
 ### Hyperparameters
@@ -54,15 +55,16 @@ algorithms are included:
 * gradient bandit
 ### Optimistic initialization
 Optimistic initialization is very similar to the ε-greedy algorithm. Contrary to the ε-greedy algorithm, it does not
-initialize the value estimates with 0, but with a positive number. The agent will now choose greedy actions because of
-their high estimates, but will be 'disappointed' of their small rewards. That way, optimistic initialization increases
-the exploration rate, because greedy actions will effectively become exploratory actions. However, this effect wears
+initialize the value estimates with 0, but with a positive number. The agent will now choose greedy actions based on
+their high estimates, but will be 'disappointed' of their small rewards. Greedy actions will effectively become
+exploratory actions. That way, optimistic initialization increases the exploration rate. However, this effect wears
 down after the initial training steps. Optimistic initialization is considered to be a suboptimal way to promote
 exploration.
 
 ### Upper Confidence Bound
 The upper confidence bound chooses its actions differently from the ε-greedy. Instead of randomly deciding between
 explorative and exploitative actions, this algorithm introduces an upper confidence bound by which actions are selected.
+
 ![](img/ucb.png)
 
 Where `Q_t(a)` is the current value estimate of action `a`, `c` is a hyperparameter that controls the degree of
@@ -78,10 +80,12 @@ The gradient bandit drops action value estimates as used in other algorithms. In
 of choosing an action. This number has no other interpretation except showing that actions with higher preferences
 result in higher rewards than actions with lower preferences. These preferences are viewed as unnormalized log
 probabilities and are converted to probabilities using the softmax equation:
+
 ![](img/softmax.png)
 
 Where `H_t(a)` is the current preference of action `a`. The action with the highest probability is chosen. After
 receiving the reward `R_t`, the preferences for each actions are updated according to the following gradient equation:
+
 ![](img/gradientupdate.png)
 
 where α is the step-size parameter and `R_t bar` is the average reward.
@@ -94,6 +98,7 @@ steps for each important hyperparameter setting of each algorithms. The importan
 * initial estimates for ε-greedy with optimistic initialization
 * c for upper confidence bound
 * α for gradient bandit
+
 ![Plot of 2.8](img/2.8.png)
 ### Hyperparameters
 #### ε-greedy
