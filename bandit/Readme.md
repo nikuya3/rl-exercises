@@ -116,14 +116,14 @@ k | 10 | The amount of 'arms', i.e. the amount of possible actions to take
 alpha | 0.1 | The step size, which controls the magnitude of estimate updates.
 epsilon | 0.1 | The probability of exploring non-greedy actions
 steps | 200000 | The amount of training iterations
-### Upper Confidence Bound
+#### Upper Confidence Bound
 Parameter | Value | Explanation
 --- | ---: | ---
 c | one of 1/16, 1/8, 1/4, 1/2, 1, 2, 4 | The degree of exploration
 k | 10 | The amount of 'arms', i.e. the amount of possible actions to take
 alpha | 0.1 | The step size, which controls the magnitude of estimate updates.
 steps | 200000 | The amount of training iterations
-### Gradient bandit
+#### Gradient bandit
 Parameter | Value | Explanation
 --- | ---: | ---
 alpha | one of 1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 3 | The step size, which controls the magnitude of preference gradients.
