@@ -6,15 +6,15 @@ This repo contains solutions to selected exercises of the textbook [Reinforcemen
 
 Install Jupyter Lab:
 
-```$ pip install jupyterlab```
+```pip install jupyterlab```
 
 Install the required packages:
 
-```$ pip install -r requirements.txt```
+```pip install -r requirements.txt```
 
 Install Julia:
 
-```# apt install julia```
+```apt install julia```
 
 Install the IJulia kernel: 
 
@@ -33,6 +33,6 @@ pkg>add HypothesisTests
 
 To start Jupter Lab, run:
 
-`$ jupyter lab`
+`jupyter lab`
 
 Now, the *.ipynb files can be interactively explored.
