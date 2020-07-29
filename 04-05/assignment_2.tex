@@ -1,0 +1,297 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,enumerate}
+\usepackage[thmmarks, amsmath, thref]{ntheorem}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{subfig}
+\usepackage{float}
+\usepackage{listings}
+\lstset{language=sql,basicstyle=\small,keywordstyle=\ttfamily,morekeywords={REFERENCES,DEFERRED}}
+\usepackage{tabularx}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\usepackage{enumitem}
+
+\usepackage{scrpage2}
+
+\usepackage{notation}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\pagestyle{scrheadings}
+
+\newcommand{\ul}[1]{\underline{#1}}
+\newcommand{\ra}{\rightarrow}
+
+\theoremstyle{nonumberplain}
+\theorembodyfont{\upshape}
+\newtheorem{ex}{Exercise}
+\newenvironment{exercise}[2]%
+   {\def\tmp{}%
+    \ifx\points\tmp
+      \begin{ex}
+    \else
+      \def\tmp{1}%
+      \begin{ex}[#1][#2 points\ifx\points\tmp\else e\fi]
+    \fi
+    \normalfont
+   }%
+   {\end{ex} %
+   }
+
+%% HINWEIS!
+%% 
+%% Die vorgegebene Formatierung der Loesung ist nur als
+%% Beispiel bzw. Hilfe gedacht und kann gerne geaendert
+%% werden.
+
+
+\title{Exercise Set 2}
+\subtitle{6.0 VU AKNUM Reinforcement Learning}
+\author{}
+
+\automark{section}
+\ohead{\pagemark}
+\makeatletter
+\chead{RL20 -- \@author}
+\makeatother
+\cfoot{}
+
+\begin{document}
+\maketitle
+
+
+
+\begin{ex}[4.1]
+By definition the value functions are undiscounted. Since $p(T,-1 | 11,\texttt{down})=1$, the deterministic successor state $s'=T$. By definition, $v(T)=0$. Thus, the value $q_\pi(11,\texttt{down})=-1+0=-1$.
+\end{ex}
+
+\begin{ex}[4.2]
+The value is calculated using $v_\pi(15)=\sum_{a}\pi(a|15) -1 + v_\pi(s')$. Using the state value table in Figure 4.1, this leads to
+
+\begin{math}
+v_\pi(15)=.25 * (-1 - 22) + .25 * (-1 - 20) + .25 * (-1 - 14) + .25 * (-1 + v_\pi(15))\implies\\
+v_\pi(15)=-14.75 + .25 * (-1 + v_\pi(15))=-15+.25v_\pi(15)\implies\\
+.75v_\pi(15)=-15\implies\\
+v_\pi(15)=-20
+\end{math}
+
+If a new state $13'$ is introduced with $p(15,-1 | 13',\texttt{down})=1$, the value function would not change since $v_\pi(15)=v_\pi(13)$ and $p(15,-1 | 13',\texttt{down})=p(13,-1 | 13,\texttt{down})=1$.
+
+\end{ex}
+
+\begin{ex}[4.3]
+For 4.3 and 4.4:\\
+\begin{math}
+q_\pi(s,a)\doteq\CEE{\pi}{G_t}{S_t=s, A_t=a}\\
+=\CEE{\pi}{R_{t+1} + \gamma G_{t+1}}{S_t=s, A_t=a}\\
+=\CEE{\pi}{R_{t+1} + \gamma \sum_{a',s'} q_\pi(s',a')}{S_t=s, A_t=a}\\
+=\sum_{s',r}p(s',r|s,a)[r+\gamma\sum_{a'} \pi(a'|s') q_\pi(s',a')]
+\end{math}
+
+For 4.5:\\
+\begin{math}
+q_{k+1}(s,a)\doteq\CEE{\pi}{R_{t+1}+\gamma v_k(S_{t+1})}{S_t=s, A_t=s}\\
+=\sum_{s',r}p(s',r|s,a)[r+\sum_{a'}\pi(a'|s')q_k(s',a')]
+\end{math}
+
+\end{ex}
+
+\begin{ex}[4.5]
+	Solution can be seen in algorithm \autoref{alg:action.politer}.\\
+\begin{algorithm}
+	\caption{Policy iteration using action values}
+	\label{alg:action.politer}
+	\textbf{Input}: $\theta > 0$
+	
+	\begin{algorithmic}
+		\State Initialize $Q(s,a) \forall s \in \S, a \in \A(s)$.
+		\State $\delta \gets 0$
+		\While{$\delta < \theta$}
+		\For{$s \in \S$, $a\in\A(s)$}
+		\State $q\gets Q(s,a)$
+		\State $Q(s,a)=\sum_{s',r}p(s',r|s,a)[r+\gamma \sum_{a' \in \A(s')}\pi(a'|s')Q(s',a')]$
+		\State $\delta \gets \max(\delta, |q-Q(s,a)|)$
+		\EndFor
+		\EndWhile
+		\State $policy-stable \gets true$
+		\For{$s\in\S$}
+		\State $old-action\gets\pi(s)$
+		\State $\pi(s)\gets \arg\max_aQ(s,a)$
+		\If{$old-action$ and $\pi(s)$ are not equi-probable}
+		\State $policy-stable \gets false$
+		\EndIf
+		\EndFor
+		\If{$policy-stable$}
+		\State\Return $V$, $\pi$
+		\Else
+		\State Go to policy evaluation
+		\EndIf
+		\State\Return false
+	\end{algorithmic}
+\end{algorithm}
+\end{ex}
+
+\begin{ex}[4.6]
+For step 3, one would determine if the policy is stable only with greedy, not exploritative actions. Also, since the policy is stochastic, $old-action$ would be chosen diferently and the update to $\pi(s|a)$ would take the $\epsilon$-soft characteristic into account.\\
+For step 2, the value updates would have to deal with a stochastic policy, not with a deterministic one. Also, the $\delta < \theta$ comparison should respect the exploritative aspect.\\
+For step 1, $\epsilon$ needs to be defined as parameter and $\pi$ needs to be a stochastic $\epsilon$-soft policy.
+\end{ex}
+
+\begin{ex}[4.10]
+
+\begin{math}
+q_{k+1}(s)\doteq\max_a\CE{R_{t+1}+\gamma \max_{a'}q_k(S_{t+1},a')}{S_t=s,A_t=a}\\
+=\sum_{s',r}p(s',r|s,a)[r+\gamma \max_{a'} q_k(s',a')]
+\end{math}
+\end{ex}
+
+\begin{ex}[5.3]
+The backup diagram for the MC estimation of $q_\pi(s)$ is similar to the MC estimation of $v_\pi(s)$ depicted on page 95. The major difference is that the backup diagram starts with an action node instead of a state node.
+\end{ex}
+
+\begin{ex}[5.9]
+The sample average update rule is as follows:
+
+\begin{equation}
+Q_{n+1}=Q_{n} + \frac{1}{n} (R_n - Q_n)
+\end{equation}
+
+This can easily be adapted by replacing the rewards with returns:
+
+\begin{equation}
+V_{n+1}=V_{n} + \frac{1}{n} (G_n - V_n)
+\end{equation}
+
+The first-visit Monte Carlo prediction algorithm can be seen in Algorithm \autoref{alg:firstvi.mc.poleval}.
+
+\begin{algorithm}
+	\caption{First-visit MC policy evaluation using sample averages}
+	\label{alg:firstvi.mc.poleval}
+	\textbf{Input}: $\pi$
+	
+	\begin{algorithmic}
+		\State Initialize $V(s) \forall s \in \S$ arbitrarily
+		\State $N(s) \gets 0 \forall s \in \S$
+		\While{true}
+		\State Generate an episode following $\pi$: $S_0,A_0,R_1,\dots, S_{T-1},A_{T-1},R_T$
+		\State $G \gets 0$
+		\ForAll{steps in episode desc}
+		\State $G \gets \gamma G + R_{t+1}$
+		\If{$S_t \not\in \{S_0,\dots,S_{t-1}\}$}
+		\State $N(S_t) \gets N(S_t) + 1$
+		\State $V(S_t) \gets V(S_t) + \frac{1}{N(S_t)} (G - V(S_t))$
+		\EndIf
+		\EndFor
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+
+\end{ex}
+
+\begin{ex}[5.10]
+The value estimate for weighted importance sampling is:
+
+\begin{equation}
+V_n \doteq \frac{\sum_{k=1}^{n-1}W_k G_k}{\sum_{k=1}^{n-1}W_k}
+\end{equation}
+
+Let $C_n=\sum_{k=1}^{n}W_k$, then the update rule is derived by:
+
+\begin{math}
+V_{n+1}=\frac{\sum_{k=1}^{n}W_k G_k}{\sum_{k=1}^{n}W_k}\\
+=\frac{1}{C_n}\left(\sum_{k=1}^{n}W_k G_k\right)\\
+=\frac{1}{C_n}\left(W_n G_n + \sum_{k=1}^{n-1}W_k G_k\right)\\
+=\frac{1}{C_n}\left(W_n G_n + (C_{n-1}) \frac{1}{C_{n-1}} \sum_{k=1}^{n-1}W_k G_k\right)\\
+=\frac{1}{C_n}\left(W_n G_n + C_{n-1}V_n\right)\\
+=\frac{1}{C_n}\left(W_n G_n + (C_n - W_n)V_n\right)\\
+=\frac{1}{C_n}\left(W_n G_n + C_n V_n - W_n V_n\right)\\
+=V_n + \frac{1}{C_n}\left(W_n G_n - W_n V_n\right)\\
+=V_n + \frac{W_n}{C_n}\left(G_n - V_n\right)
+\end{math}
+\end{ex}
+
+\begin{ex}[5.13]
+The importance weighted reward is given by:
+
+\begin{equation}
+\rho_{t:T-1} R_{t+1}= \frac{\pi(A_t|S_t)}{b(A_t|S_t)}  \frac{\pi(A_{t+1}|S_{t+1})}{b(A_{t+1}|S_{t+1})} \dots \frac{\pi(A_{T-1}|S_{T-1})}{b(A_{T-1}|S_{T-1})} R_{t+1}
+\end{equation}
+
+The expectation of this is:
+
+\begin{math}
+\E{\rho_{t:T-1} R_{t+1}}= \E{\frac{\pi(A_t|S_t)}{b(A_t|S_t)}  \frac{\pi(A_{t+1}|S_{t+1})}{b(A_{t+1}|S_{t+1})} \dots \frac{\pi(A_{T-1}|S_{T-1})}{b(A_{T-1}|S_{T-1})} R_{t+1}}\\
+=\E{\frac{\pi(A_t|S_t)}{b(A_t|S_t)}} \E{\frac{\pi(A_{t+1}|S_{t+1})}{b(A_{t+1}|S_{t+1})}} \dots \E{\frac{\pi(A_{T-1}|S_{T-1})}{b(A_{T-1}|S_{T-1})}} \E{R_{t+1}}
+\end{math}
+
+Using Equation 5.13, we know that $\E{\frac{\pi(A_k|S_k)}{b(A_k|S_k)}}=1 \forall k > t$. Thus, the expectation simplifies to:
+
+\begin{math}
+\E{\rho_{t:T-1} R_{t+1}}=\E{\frac{\pi(A_t|S_t)}{b(A_t|S_t)}} 1 \dots 1 \E{R_{t+1}}=\E{\frac{\pi(A_t|S_t)}{b(A_t|S_t)}}\E{R_{t+1}}=\E{\frac{\pi(A_t|S_t)}{b(A_t|S_t)} R_{t+1}}
+\end{math}
+
+\end{ex}
+
+\begin{ex}[5.14]
+The weighted importance sampling estimator is given by:
+
+\begin{equation}
+V(s) \doteq \frac{\sum_{t\in \mathcal{T}(s)}\left((1-\gamma) \sum_{h=t+1}^{T(t)-1}\gamma^{h-t-1}\rho_{t:h-1} \tilde{G}_{t:h} + \gamma^{T(t)-t-1}\rho_{t:T(t)-1} \tilde{G}_{t:T(t)}\right)}
+{\sum_{t\in \mathcal{T}(s)}\left((1-\gamma) \sum_{h=t+1}^{T(t)-1}\gamma^{h-t-1}\rho_{t:h-1} + \gamma^{T(t)-t-1}\rho_{t:T(t)-1}\right)}
+\end{equation}
+
+In order to adapt this for action values, the importance ratios have to be shifted. The ratio is defined by:
+
+\begin{equation}
+\rho_{t:T-1}\doteq \prod_{k=t}^{T-1} \frac{ \pi(A_k|S_k)}{b(A_k|S_k)}
+\end{equation}
+
+Since action $A_t$ is already defined for $q(s,a)$, the estimator has to be adapted to:
+
+\begin{equation}
+Q(s,a) \doteq \frac{\sum_{t\in \mathcal{T}(s)}\left((1-\gamma) \sum_{h=t+1}^{T(t)-1}\gamma^{h-t-1}\rho_{t+1:h-1} \tilde{G}_{t:h} + \gamma^{T(t)-t-1}\rho_{t+1:T(t)-1} \tilde{G}_{t:T(t)}\right)}
+{\sum_{t\in \mathcal{T}(s)}\left((1-\gamma) \sum_{h=t+1}^{T(t)-1}\gamma^{h-t-1}\rho_{t+1:h-1} + \gamma^{T(t)-t-1}\rho_{t+1:T(t)-1}\right)}
+\end{equation}
+
+The resulting algorithm can be seen in Algorithm \autoref{alg:offpol.mc.control.trunc}. It is highly likely that the algorithm is not optimal and could be improved towards linear time.
+
+\begin{algorithm}
+	\caption{Off-policy MC control using truncated weighted-importance sampling}
+	\label{alg:offpol.mc.control.trunc}
+	\textbf{Input}: $\pi$
+	
+	\begin{algorithmic}
+		\ForAll{$s\in\S,a\in\A(s)$}
+		\State $Q(s,a)\in\R$ arbitrarily
+		\State $P(s,a) \gets 0$
+		\State $R(s,a) \gets 0$
+		\State $\pi(s) \gets \arg\max_a Q(s,a)$
+		\EndFor
+		\While{true}
+		\State $b \gets$ any soft policy
+		\State Generate an episode following $b$: $S_0,A_0,R_1,\dots, S_{T-1},A_{T-1},R_T$
+		\State $G_T \gets 0$
+		\State $\rho \gets 1$
+		\State $W(T) \gets 1$
+		\ForAll{steps in episode desc}
+		\State $G_T \gets \gamma G_T + R_{t+1}$
+		\State $R(s,a) \gets R(s,a) + (1-\gamma) \sum_{h=t+1}^{T-1} W(h) \sum_{k=1}^{h} R_k + \gamma^{T-t-1} \rho G_T$
+		\State $P(s,a) \gets P(s,a) + (1-\gamma) \sum_{h=t+1}^{T-1} W(h) + \gamma^{T-t-1} \rho$
+		\State $Q(S_t,A_t) \gets \frac{R(s,a)}{P(s,a)}$
+		\State $\pi(s) \gets \arg\max_a Q(s,a)$
+		\If{$A_t \neq \pi(S_t)$}
+		exit loop
+		\EndIf
+		\State $W(t - 1) \gets W(t) \gamma^{t - 1}\frac{1}{b(A_t|S_t)}$
+		\State $\rho \gets \rho \frac{1}{b(A_t|S_t)}$
+		\EndFor
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+
+\end{ex}
+
+\end{document}
